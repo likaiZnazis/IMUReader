@@ -40,7 +40,8 @@ class UIModelView: ObservableObject{
             return AnyView(CreateNewSet())
         case .instructions:
             return AnyView(ShowInstructions())
-        default: return AnyView(Text("None"))
+        case .startMeasuring:
+            return AnyView(MeasuringView())
         }
     }
     

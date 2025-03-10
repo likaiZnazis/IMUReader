@@ -12,11 +12,11 @@ struct SquatSet: Identifiable {
     var SquatReps: [SquatRep] = []
 }
 
-enum SquatForm{
-    case good
-    case bad
-    case none
-}
+//enum SquatForm{
+//    case good
+//    case bad
+//    case none
+//}
 
 struct RotationAngles{
     var pitch: Double
@@ -28,7 +28,7 @@ struct SquatRep: Identifiable {
     var id: UUID = UUID()
     var time: Date = Date()
     var sampleNumber: Int
-    var form: SquatForm
+//    var form: SquatForm
     var suggestions: [String] = []
     var depth: Double = 0.0
     var rotation: RotationAngles

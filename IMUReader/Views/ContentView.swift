@@ -47,14 +47,17 @@ struct ContentView: View {
                     Text(mainState.headingText())
                         .font(.headline)
                         .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
+                        .multilineTextAlignment(.leading)
                 }
+//                .border(.white, width: 2)
                 //Main body where the content changes
                 mainState.changeMainContent()
                 }
-                .padding()
+//                .border(.blue, width: 2)
+                .padding(5)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(.black)
+//                .border(.blue, width: 2)
                 .cornerRadius(12)
                 .padding()
             //Bottom buttons

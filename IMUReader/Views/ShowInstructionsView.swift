@@ -8,6 +8,8 @@ import SwiftUI
 
 struct ShowInstructions: View {
     
+    @EnvironmentObject var mainState: UIModelView
+    
     private let instructions = ["Before you press the START button. Read instructions!", "Place your phone inside your right pocket", "Place the barbell on your back", "After 10 seconds a vibration will happen. Start squatting", "A seond vibration will happen. Stop squating", "Do 11 reps. 1st one is for calibration"]
     
     var body: some View {
@@ -27,7 +29,7 @@ struct ShowInstructions: View {
             .background(.black.opacity(0.4))
             .scrollContentBackground(.hidden)
             Button(action: {
-                print("Starting to measure")
+                mainState.navigate(to: .startMeasuring)
             }){
                 HStack{
                     Text("START")
