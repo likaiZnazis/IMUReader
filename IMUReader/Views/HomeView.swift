@@ -1,11 +1,3 @@
-//
-//  HomeView.swift
-//  IMUReader
-//
-//  Created by Martins Vitols on 21/02/2025.
-//
-//  This view is for giving intro about the application.
-//  What the application is for, who made it
 
 import SwiftUI
 

@@ -1,9 +1,3 @@
-//
-//  IMUReaderTests.swift
-//  IMUReaderTests
-//
-//  Created by Martins Vitols on 22/01/2025.
-//
 
 import XCTest
 @testable import IMUReader

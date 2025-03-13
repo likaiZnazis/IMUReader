@@ -1,9 +1,3 @@
-//
-//  MeasuringSection.swift
-//  IMUReader
-//
-//  Created by Martins Vitols on 19/02/2025.
-//
 
 import SwiftUI
 

@@ -1,10 +1,3 @@
-//
-//  UIModelView.swift
-//  IMUReader
-//
-//  Created by Martins Vitols on 21/02/2025.
-//
-//  Handles the UI logic
 
 import UIKit
 import SwiftUI
@@ -41,7 +34,8 @@ class UIModelView: ObservableObject{
         case .instructions:
             return AnyView(ShowInstructions())
         case .startMeasuring:
-            return AnyView(MeasuringView())
+            let fileStorageManager = FileStorageManager()
+            return AnyView(MeasuringView(fileStorage: fileStorageManager))
         }
     }
     

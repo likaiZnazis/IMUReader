@@ -1,20 +1,17 @@
-//
-//  IMUReaderApp.swift
-//  IMUReader
-//
-//  Created by Martins Vitols on 22/01/2025.
-//
 
 import SwiftUI
 
 @main
 struct IMUReader: App {
     @StateObject private var mainState = UIModelView()
+    @StateObject private var squatMeasurementState = SquatMeasurement()
     
     var body: some Scene {
+        
         WindowGroup {
             ContentView()
                 .environmentObject(mainState)
+                .environmentObject(squatMeasurementState)
         }
     }
 }
