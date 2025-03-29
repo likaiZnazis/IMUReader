@@ -1,50 +1,38 @@
-//
-//  MeasuringView.swift
-//  IMUReader
-//
-//  Created by Martins Vitols on 21/02/2025.
-//
-        
+ 
 import SwiftUI
 import CoreMotion
 
 struct MeasuringView: View {
-    @StateObject private var imuManager = IMUManager()
+    var fileStorage: FileStorageManager
+    @EnvironmentObject var squatMeasurement: SquatMeasurement
     
     var body: some View {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Accelerometer: \(imuManager.acceleration)")
-                Text("Gyroscope: \(imuManager.gyroscope)")
-                Text("Magnetometer: \(imuManager.magnetometer)")
-                Text("Pitch: \(imuManager.pitch, specifier: "%.2f")")
-                Text("Roll: \(imuManager.roll, specifier: "%.2f")")
-                Text("Yaw: \(imuManager.yaw, specifier: "%.2f")")
+        VStack(alignment: .leading, spacing: 10) {
+            
+            Text("Pitch: \(squatMeasurement.currentRep?.rotation.pitch ?? 0 , specifier: "%.2f")")
+            Text("Roll: \(squatMeasurement.currentRep?.rotation.roll ?? 0, specifier: "%.2f")")
+            Text("Yaw: \(squatMeasurement.currentRep?.rotation.yaw ?? 0, specifier: "%.2f")")
+            
+            Spacer()
+            HStack {
+                Button(squatMeasurement.isMeasuring ? "Stop" : "Start") {
+                    squatMeasurement.isMeasuring ? squatMeasurement.stopTracking() : squatMeasurement.startTracking()
+                }
+                .padding()
+                .frame(maxWidth: .infinity, minHeight: 50)
+                .background(squatMeasurement.isMeasuring ? Color.red : Color.green)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                
                 Spacer()
-                HStack {
-                    Button(imuManager.isMeasuring ? "Stop" : "Start") {
-                        imuManager.toggleIMUUpdates()
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity, minHeight: 50)
-                    .background(imuManager.isMeasuring ? Color.red : Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-
-                    
-                    Spacer()
-                    Button("Export CSV") {
-                        imuManager.exportCSV()
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity, minHeight: 50)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                Button("Save Set") {
+                    fileStorage.exportCSV()
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
         }
+    }
 }
 
 class IMUManager: ObservableObject {
@@ -158,4 +146,3 @@ class IMUManager: ObservableObject {
         }
     }
 }
-
