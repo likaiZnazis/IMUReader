@@ -65,6 +65,7 @@ class IMUManager: ObservableObject {
         createCSVFile()
     }
     
+
     func toggleIMUUpdates() {
         if isMeasuring {
             stopIMUUpdates()
@@ -73,57 +74,71 @@ class IMUManager: ObservableObject {
         }
         isMeasuring.toggle()
     }
-    
+
     func startIMUUpdates() {
         if motionManager.isDeviceMotionAvailable {
             motionManager.deviceMotionUpdateInterval = updateInterval
             motionManager.startDeviceMotionUpdates(using: .xMagneticNorthZVertical, to: .main) { [weak self] (motion, error) in
                 guard let self = self, let motion = motion else { return }
-                
+
                 let acc = motion.userAcceleration
                 self.acceleration = String(format: "X: %.2f, Y: %.2f, Z: %.2f", acc.x, acc.y, acc.z)
-                
+
                 let gyro = motion.rotationRate
                 self.gyroscope = String(format: "X: %.2f, Y: %.2f, Z: %.2f", gyro.x, gyro.y, gyro.z)
-                
-                if let mag = self.motionManager.magnetometerData?.magneticField {
-                    self.magnetometer = String(format: "X: %.2f, Y: %.2f, Z: %.2f", mag.x, mag.y, mag.z)
-                }
-                
+
+                let mag = motion.magneticField.field
+                self.magnetometer = String(format: "X: %.2f, Y: %.2f, Z: %.2f", mag.x, mag.y, mag.z)
+
                 self.pitch = motion.attitude.pitch * (180.0 / .pi)
                 self.roll = motion.attitude.roll * (180.0 / .pi)
                 self.yaw = motion.attitude.yaw * (180.0 / .pi)
-                
-                self.appendToCSV(acc: acc, gyro: gyro, pitch: self.pitch, roll: self.roll, yaw: self.yaw)
+
+                self.appendToCSV(acc: acc, gyro: gyro, mag: mag, pitch: self.pitch, roll: self.roll, yaw: self.yaw)
             }
         }
     }
-    
     func stopIMUUpdates() {
         motionManager.stopDeviceMotionUpdates()
     }
-    
+
     // MARK: - CSV File Handling
     private func createCSVFile() {
         let fileName = "IMUData.csv"
+
         if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
             let fileURL = dir.appendingPathComponent(fileName)
+
+            // Delete the existing file if it exists
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                do {
+                    try FileManager.default.removeItem(at: fileURL)
+                    print("Deleted existing file before creating a new one.")
+                } catch {
+                    print("Failed to delete file: \(error)")
+                }
+            }
+
             csvFileURL = fileURL
-            
-            if !FileManager.default.fileExists(atPath: fileURL.path) {
-                let headers = "Time,AccX,AccY,AccZ,GyroX,GyroY,GyroZ,Pitch,Roll,Yaw\n"
-                try? headers.write(to: fileURL, atomically: true, encoding: .utf8)
+
+            // Create a new file and add headers
+            let headers = "Time,AccX,AccY,AccZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ,Pitch,Roll,Yaw\n"
+            do {
+                try headers.write(to: fileURL, atomically: true, encoding: .utf8)
+                print("CSV file created successfully.")
+            } catch {
+                print("Failed to create CSV file: \(error)")
             }
         }
     }
-    
-    private func appendToCSV(acc: CMAcceleration, gyro: CMRotationRate, pitch: Double, roll: Double, yaw: Double) {
+
+    private func appendToCSV(acc: CMAcceleration, gyro: CMRotationRate, mag: CMMagneticField, pitch: Double, roll: Double, yaw: Double) {
         guard let fileURL = csvFileURL else { return }
-        
+
         let timestamp = Date().timeIntervalSince1970
-        let newLine = String(format: "%.2f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.2f,%.2f,%.2f\n",
-                             timestamp, acc.x, acc.y, acc.z, gyro.x, gyro.y, gyro.z, pitch, roll, yaw)
-        
+        let newLine = String(format: "%.2f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
+                             timestamp, acc.x, acc.y, acc.z, gyro.x, gyro.y, gyro.z, mag.x, mag.y, mag.z, pitch, roll, yaw)
+
         if let fileHandle = try? FileHandle(forWritingTo: fileURL) {
             fileHandle.seekToEndOfFile()
             if let data = newLine.data(using: .utf8) {
@@ -132,10 +147,10 @@ class IMUManager: ObservableObject {
             fileHandle.closeFile()
         }
     }
-    
+
     func exportCSV() {
         guard let fileURL = csvFileURL else { return }
-        
+
         let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootViewController = windowScene.windows.first?.rootViewController {
