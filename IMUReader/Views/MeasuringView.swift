@@ -15,7 +15,6 @@ struct MeasuringView: View {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Accelerometer: \(imuManager.acceleration)")
                 Text("Gyroscope: \(imuManager.gyroscope)")
-                Text("Magnetometer: \(imuManager.magnetometer)")
                 Text("Pitch: \(imuManager.pitch, specifier: "%.2f")")
                 Text("Roll: \(imuManager.roll, specifier: "%.2f")")
                 Text("Yaw: \(imuManager.yaw, specifier: "%.2f")")
@@ -56,7 +55,6 @@ class IMUManager: ObservableObject {
     @Published var isMeasuring = false
     @Published var acceleration: String = "X: 0.00, Y: 0.00, Z: 0.00"
     @Published var gyroscope: String = "X: 0.00, Y: 0.00, Z: 0.00"
-    @Published var magnetometer: String = "X: 0.00, Y: 0.00, Z: 0.00"
     @Published var pitch: Double = 0.0
     @Published var roll: Double = 0.0
     @Published var yaw: Double = 0.0
@@ -87,14 +85,11 @@ class IMUManager: ObservableObject {
                 let gyro = motion.rotationRate
                 self.gyroscope = String(format: "X: %.2f, Y: %.2f, Z: %.2f", gyro.x, gyro.y, gyro.z)
 
-                let mag = motion.magneticField.field
-                self.magnetometer = String(format: "X: %.2f, Y: %.2f, Z: %.2f", mag.x, mag.y, mag.z)
-
                 self.pitch = motion.attitude.pitch * (180.0 / .pi)
                 self.roll = motion.attitude.roll * (180.0 / .pi)
                 self.yaw = motion.attitude.yaw * (180.0 / .pi)
 
-                self.appendToCSV(acc: acc, gyro: gyro, mag: mag, pitch: self.pitch, roll: self.roll, yaw: self.yaw)
+                self.appendToCSV(acc: acc, gyro: gyro, pitch: self.pitch, roll: self.roll, yaw: self.yaw)
             }
         }
     }
@@ -122,7 +117,7 @@ class IMUManager: ObservableObject {
             csvFileURL = fileURL
 
             // Create a new file and add headers
-            let headers = "Time,AccX,AccY,AccZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ,Pitch,Roll,Yaw\n"
+            let headers = "Time,AccX,AccY,AccZ,GyroX,GyroY,GyroZ,Pitch,Roll,Yaw\n"
             do {
                 try headers.write(to: fileURL, atomically: true, encoding: .utf8)
                 print("CSV file created successfully.")
@@ -132,12 +127,12 @@ class IMUManager: ObservableObject {
         }
     }
 
-    private func appendToCSV(acc: CMAcceleration, gyro: CMRotationRate, mag: CMMagneticField, pitch: Double, roll: Double, yaw: Double) {
+    private func appendToCSV(acc: CMAcceleration, gyro: CMRotationRate, pitch: Double, roll: Double, yaw: Double) {
         guard let fileURL = csvFileURL else { return }
 
         let timestamp = Date().timeIntervalSince1970
-        let newLine = String(format: "%.2f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
-                             timestamp, acc.x, acc.y, acc.z, gyro.x, gyro.y, gyro.z, mag.x, mag.y, mag.z, pitch, roll, yaw)
+        let newLine = String(format: "%.2f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
+                             timestamp, acc.x, acc.y, acc.z, gyro.x, gyro.y, gyro.z, pitch, roll, yaw)
 
         if let fileHandle = try? FileHandle(forWritingTo: fileURL) {
             fileHandle.seekToEndOfFile()
